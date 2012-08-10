@@ -9,16 +9,17 @@ password = "123"
 oj = None
 problemid = None
 sourcefile = None
+sourcecode = None
 lang = "c++"
 host = {"zoj":"acm.zju.edu.cn", 
 		"poj":"poj.org",
 		"hdu":"acm.hdu.edu.cn" }
-	
 # Host of each Online Judge
+
 def prearg():
-	global oj,problemid,sourcefile
+	global oj,problemid,sourcecode,sourcefile
 	if len(sys.argv) < 4 :
-		D("Lack of parameters\n")
+		D("Usage: sb OJname Problemid Sourcefile\n")
 	oj = sys.argv[1].lower()
 	if oj == "zoj" or oj == "zju":
 		oj = "zoj"
@@ -33,7 +34,7 @@ def prearg():
 	if os.path.exists(sourcefile) == False:
 		D("I can't find file : "+sourcefile+"\n")
 	f = open(sourcefile)
-	sourcefile = f.read()
+	sourcecode = f.read()
 	f.close()
 
 def request(method,path,body="",headers={}):
@@ -49,7 +50,7 @@ def request(method,path,body="",headers={}):
 def D(strr):
 	"""some thing wrong, output strr and exit
 	"""
-	sys.stdout.write(strr)
+	sys.stderr.write(strr)
 	sys.exit(1)
 
 def getlanguage(code):
@@ -99,8 +100,11 @@ def submitzoj( problemid, lang, code ):
 	path = "/onlinejudge/showProblem.do?problemCode=";
 	header = {"Cookie":getcookiezoj()+" last_language=1" }
 	temp = request("GET",path+problemid,headers=header)
-	rst = temp["response"]
+	if temp["response"].status != httplib.OK:
+		D("Can't get zoj problemn\n")
 	strr= temp["string"]
+	if strr.find("No Such Problem") != -1:
+		D("No such problem : "+problemid+"\n")
 	problemid = ""
 	i = 0
 	strr = strr[ strr.find("problemId=")+10: ]
@@ -130,14 +134,8 @@ def submitzoj( problemid, lang, code ):
 
 	print status
 	return
-	if rst.status != httplib.OK:
-		D("Can't get zoj problemn\n")
-	if rst.read().find("No Such Problem") != -1:
-		D("No such problem : "+problemid+"\n")
-	
-
 
 # connect to server, login, submit code
 if __name__ == "__main__":
 	prearg()
-	submitzoj(problemid,lang,sourcefile)	
+	submitzoj(problemid,lang,sourcecode)	
