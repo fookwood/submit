@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 import urllib, httplib
-import os, sys, re
+import os, sys, re, time
 
 
-username = ""
-password = ""
+username = "woodfook"
+password = "123"
 oj = None
 problemid = None
 sourcefile = None
@@ -32,6 +32,9 @@ def prearg():
 	sourcefile = sys.argv[3]
 	if os.path.exists(sourcefile) == False:
 		D("I can't find file : "+sourcefile+"\n")
+	f = open(sourcefile)
+	sourcefile = f.read()
+	f.close()
 
 def request(method,path,body="",headers={}):
 	global oj
@@ -120,8 +123,12 @@ def submitzoj( problemid, lang, code ):
 	
 	path = "/onlinejudge/showRuns.do?contestId=1&search=true&"
 	path += "idStart="+statusid+"&idEnd="+statusid
-	temp = request("GET",path)
-	print temp["string"]
+	status = "Compiling"
+	while status == "Compiling" or status == "Running":
+		time.sleep(1)
+		status = request("GET",path)["string"].split("\n")[281].strip()
+
+	print status
 	return
 	if rst.status != httplib.OK:
 		D("Can't get zoj problemn\n")
