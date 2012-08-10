@@ -102,7 +102,6 @@ def getcookie():
 	return strr[0]
 
 def submitpoj( problemid, lang, code ):
-	path = "/submit"
 	params = urllib.urlencode( {"problem_id":problemid,
 								"language":1,
 								"source":code } )
@@ -155,9 +154,31 @@ def submitzoj( problemid, lang, code ):
 		status = request("GET",path)["string"].split("\n")[281].strip()
 
 	print status
-	return
+
+def submithdu( problemid, lang, code ):
+	params = urllib.urlencode( {"problemid":problemid,
+								"language":1,
+								"usercode":code,
+								"check":0} )
+	header = {"Cookie":getcookie(),
+	          "Content-Type":"application/x-www-form-urlencoded",
+	          "Content-Length":str(len(params))}
+	request("POST","/submit.php?action=submit",params,header)
+	status = ""
+	while status == "Queuing" or status == "":
+		strr = request("GET","/status.php?user="+username[oj])["string"].split("\n")[77]
+		temp = strr[strr.find("font color"):].split("<")[0].split(">")[1]
+		if temp != status:
+			print temp
+		status = temp
+
 
 # connect to server, login, submit code
 if __name__ == "__main__":
 	prearg()
-	submitpoj(problemid,lang,sourcecode)	
+	if oj == "zoj":
+		submitzoj(problemid,lang,sourcecode)
+	elif oj == "poj":
+		submitpoj(problemid,lang,sourcecode)
+	else:
+		submithdu(problemid,lang,sourcecode)
