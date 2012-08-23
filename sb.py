@@ -6,21 +6,22 @@ import os, sys, re, time
 # ########## user edit below ####### #
 username = {"zoj":"woodfook","poj":"fkfkfk","hdu":"fkfkfk"}
 password = {"zoj":"123"     ,"poj":"fkfkfk","hdu":"fkfkfk"}
-defaultc = "gcc"
-defaultcpp = "g++"
+defaultc = "gcc"		# gcc or c
+defaultcpp = "g++"		# g++ or c++
 # ########## user edit above ####### #
 
 oj = None
 problemid = None
 sourcefile = None
 sourcecode = None
-lang = "c++"
 host = {"zoj":"acm.zju.edu.cn", 
 		"poj":"poj.org",
 		"hdu":"acm.hdu.edu.cn" }
 # Host of each Online Judge
 
 def prearg():
+	"""process arguments
+	"""
 	global oj,problemid,sourcecode,sourcefile
 	if len(sys.argv) < 4 :
 		D("Usage: sb OJname Problemid Sourcefile\n")
@@ -42,6 +43,8 @@ def prearg():
 	f.close()
 
 def request(method,path,body="",headers={}):
+	"""send requests to host and return response and page
+	"""
 	global oj
 	conn = httplib.HTTPConnection(host[oj]);
 #	conn.set_debuglevel(1)
@@ -78,17 +81,20 @@ def getlanguage(code):
 	 	return "python"
 	if l == "pl" :
 	 	return "perl"
+	if l == "scm":
+		return "scheme"
+	return None
 
 def getlangpoj(lang):
 	if lang == "c++":
 		if defaultcpp == "g++":
 			return 0
-		else
+		else:
 			return 4
 	elif lang == "c":
 		if defaultc == "gcc":
 			return 1
-		else
+		else:
 			return 5
 	elif lang == "pascal":
 		return 3
@@ -121,11 +127,11 @@ def getlangzoj(lang):
 
 def getlanghdu(lang):
 	if lang == "c++":
-		if defaultcpp == "g++"
+		if defaultcpp == "g++":
 			return 0
 		else:
 			return 2
-	else lang == "c":
+	elif lang == "c":
 		if defaultc == "gcc":
 			return 1
 		else:
@@ -163,7 +169,7 @@ def getcookie():
 		return strr[2]
 	return strr[0]
 
-def submitpoj( problemid, lang, code ):
+def submitpoj( problemid, code ):
 	params = urllib.urlencode( {"problem_id":problemid,
 								"language":getlangpoj(getlanguage(sourcefile)),
 								"source":code } )
@@ -182,7 +188,7 @@ def submitpoj( problemid, lang, code ):
 		status = temp
 		time.sleep(1)
 
-def submitzoj( problemid, lang, code ):
+def submitzoj( problemid, code ):
 	path = "/onlinejudge/showProblem.do?problemCode=";
 	header = {"Cookie":getcookie() }
 	temp = request("GET",path+problemid,headers=header)
@@ -221,7 +227,7 @@ def submitzoj( problemid, lang, code ):
 		status =  temp
 		time.sleep(1)
 
-def submithdu( problemid, lang, code ):
+def submithdu( problemid, code ):
 	params = urllib.urlencode( {"problemid":problemid,
 								"language":getlanghdu(getlanguage(sourcefile)),
 								"usercode":code,
@@ -233,7 +239,7 @@ def submithdu( problemid, lang, code ):
 	if rst.status == httplib.OK:
 		D("You may check your problemid and code length...\n")
 	status = ""
-	while status == "Queuing" or status == "":
+	while status == "Queuing" or status == "Running" or status == "":
 		strr = request("GET","/status.php?user="+username[oj])["string"].split("\n")[78]
 		temp = strr[strr.find("font color"):].split("<")[0].split(">")[1]
 		if temp != status:
@@ -246,8 +252,8 @@ def submithdu( problemid, lang, code ):
 if __name__ == "__main__":
 	prearg()
 	if oj == "zoj":
-		submitzoj(problemid,lang,sourcecode)
+		submitzoj(problemid,sourcecode)
 	elif oj == "poj":
-		submitpoj(problemid,lang,sourcecode)
+		submitpoj(problemid,sourcecode)
 	else:
-		submithdu(problemid,lang,sourcecode)
+		submithdu(problemid,sourcecode)
