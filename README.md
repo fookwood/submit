@@ -6,4 +6,4 @@ a python script to submit source file to OJs
 Usage: # ./sb.py Ojname Problemid Sourcefile
 
 
-![usage](https://github.com/fookwood/submit/blob/master/demo.png)
+![usage](https://raw.github.com/fookwood/submit/master/demo.png)
