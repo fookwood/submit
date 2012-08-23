@@ -3,9 +3,13 @@
 import urllib, httplib
 import os, sys, re, time
 
-
+# ########## user edit below ####### #
 username = {"zoj":"woodfook","poj":"fkfkfk","hdu":"fkfkfk"}
 password = {"zoj":"123"     ,"poj":"fkfkfk","hdu":"fkfkfk"}
+defaultc = "gcc"
+defaultcpp = "g++"
+# ########## user edit above ####### #
+
 oj = None
 problemid = None
 sourcefile = None
@@ -75,6 +79,64 @@ def getlanguage(code):
 	if l == "pl" :
 	 	return "perl"
 
+def getlangpoj(lang):
+	if lang == "c++":
+		if defaultcpp == "g++":
+			return 0
+		else
+			return 4
+	elif lang == "c":
+		if defaultc == "gcc":
+			return 1
+		else
+			return 5
+	elif lang == "pascal":
+		return 3
+	elif lang == "java":
+		return 2
+	elif lang == "fortran":
+		return 6
+	else:
+		D("poj don't support "+lang+"\n")
+
+def getlangzoj(lang):
+	if lang == "c":
+		return 1
+	elif lang == "c++":
+		return 2
+	elif lang == "pascal":
+		return 3
+	elif lang == "java":
+		return 4
+	elif lang == "python":
+		return 5
+	elif lang == "perl":
+		return 6
+	elif lang == "scheme":
+		return 7
+	elif lang == "php":
+		return 8
+	else:
+		D("zoj doesn't support "+lang+"\n")
+
+def getlanghdu(lang):
+	if lang == "c++":
+		if defaultcpp == "g++"
+			return 0
+		else:
+			return 2
+	else lang == "c":
+		if defaultc == "gcc":
+			return 1
+		else:
+			return 3
+	elif lang == "pascal":
+		return 4
+	elif lang == "java":
+		return 5
+	else:
+		D("hdu doesn't support "+lang+"\n")
+
 def getcookie():
 	"""simulate 'POST' to get cookies
 	"""
@@ -103,7 +165,7 @@ def getcookie():
 
 def submitpoj( problemid, lang, code ):
 	params = urllib.urlencode( {"problem_id":problemid,
-								"language":1,
+								"language":getlangpoj(getlanguage(sourcefile)),
 								"source":code } )
 	header = {"Cookie":getcookie(),
 	          "Content-Type":"application/x-www-form-urlencoded",
@@ -137,7 +199,7 @@ def submitzoj( problemid, lang, code ):
 		i = i+1
 
 	params = urllib.urlencode({"problemId":problemid,
-							   "languageId":1,
+							   "languageId":getlangzoj(getlanguage(sourcefile)),
 							   "source":code})
 	header["Content-Type"]="application/x-www-form-urlencoded"
 	header["Content-Length"]=str( len(params) ) 
@@ -161,7 +223,7 @@ def submitzoj( problemid, lang, code ):
 
 def submithdu( problemid, lang, code ):
 	params = urllib.urlencode( {"problemid":problemid,
-								"language":1,
+								"language":getlanghdu(getlanguage(sourcefile)),
 								"usercode":code,
 								"check":0} )
 	header = {"Cookie":getcookie(),
