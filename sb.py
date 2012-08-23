@@ -108,7 +108,9 @@ def submitpoj( problemid, lang, code ):
 	header = {"Cookie":getcookie(),
 	          "Content-Type":"application/x-www-form-urlencoded",
 	          "Content-Length":str(len(params))}
-	request("POST","/submit",params,header)
+	rst = request("POST","/submit",params,header)["response"]
+	if rst.status == httplib.OK:
+		D("You may check your problemid and code length...\n")
 	status = ""
 	while status == "Waiting" or status == "Compiling" or status == "Running & Judging" or status == "":
 		strr = request("GET","/status?user_id="+username[oj])["string"].split("\n")[2]
@@ -116,6 +118,7 @@ def submitpoj( problemid, lang, code ):
 		if temp != status:
 			print temp
 		status = temp
+		time.sleep(1)
 
 def submitzoj( problemid, lang, code ):
 	path = "/onlinejudge/showProblem.do?problemCode=";
@@ -124,7 +127,7 @@ def submitzoj( problemid, lang, code ):
 	if temp["response"].status != httplib.OK:
 		D("Can't get zoj problemn\n")
 	strr= temp["string"]
-	if strr.find("No Such Problem") != -1:
+	if strr.find("No such problem") != -1:
 		D("No such problem : "+problemid+"\n")
 	problemid = ""
 	i = 0
@@ -132,7 +135,7 @@ def submitzoj( problemid, lang, code ):
 	while strr[i].isdigit():
 		problemid += strr[i]
 		i = i+1
-	
+
 	params = urllib.urlencode({"problemId":problemid,
 							   "languageId":1,
 							   "source":code})
@@ -145,15 +148,16 @@ def submitzoj( problemid, lang, code ):
 	while strr[i].isdigit():
 		statusid += strr[i]
 		i = i+1
-	
+
 	path = "/onlinejudge/showRuns.do?contestId=1&search=true&"
 	path += "idStart="+statusid+"&idEnd="+statusid
 	status = "Compiling"
 	while status == "Compiling" or status == "Running":
+		temp = request("GET",path)["string"].split("\n")[281].strip()
+		if temp != status:
+			print temp
+		status =  temp
 		time.sleep(1)
-		status = request("GET",path)["string"].split("\n")[281].strip()
-
-	print status
 
 def submithdu( problemid, lang, code ):
 	params = urllib.urlencode( {"problemid":problemid,
@@ -163,14 +167,17 @@ def submithdu( problemid, lang, code ):
 	header = {"Cookie":getcookie(),
 	          "Content-Type":"application/x-www-form-urlencoded",
 	          "Content-Length":str(len(params))}
-	request("POST","/submit.php?action=submit",params,header)
+	rst = request("POST","/submit.php?action=submit",params,header)["response"]
+	if rst.status == httplib.OK:
+		D("You may check your problemid and code length...\n")
 	status = ""
 	while status == "Queuing" or status == "":
-		strr = request("GET","/status.php?user="+username[oj])["string"].split("\n")[77]
+		strr = request("GET","/status.php?user="+username[oj])["string"].split("\n")[78]
 		temp = strr[strr.find("font color"):].split("<")[0].split(">")[1]
 		if temp != status:
 			print temp
 		status = temp
+		time.sleep(1)
 
 
 # connect to server, login, submit code
